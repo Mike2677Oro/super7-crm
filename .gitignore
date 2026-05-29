@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+credentials.json
+data/super7.db
+uploads/
+.env
+venv/
+.venv/
+*.egg-info/
+.claude/
