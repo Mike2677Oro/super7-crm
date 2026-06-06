@@ -596,6 +596,9 @@ input:checked+.tgl-tr::before{transform:translateX(16px);background:var(--ac)}
         <button id="sb-btn-usuarios" class="sb-btn sb-up" style="display:none;padding:5px 8px" title="Gestión de usuarios" onclick="nav('admin-usuarios',null)">
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </button>
+        <button id="sb-btn-reset" class="sb-btn sb-up" style="display:none;padding:5px 8px;color:var(--rojo)" title="Resetear base de datos (admin)" onclick="resetDB()">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>
+        </button>
         <button class="sb-btn sb-up" style="padding:5px 8px" title="Cerrar sesión" onclick="doLogout()">
           <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
@@ -3950,7 +3953,25 @@ function actualizarUIUsuario(){
     document.getElementById('sb-user-rol').textContent = rol;
     const btnU = document.getElementById('sb-btn-usuarios');
     if(btnU) btnU.style.display = rol === 'admin' ? 'flex' : 'none';
+    const btnR = document.getElementById('sb-btn-reset');
+    if(btnR) btnR.style.display = rol === 'admin' ? 'flex' : 'none';
     sbUser.style.display = 'block';
+  }
+}
+
+async function resetDB(){
+  if(_currentUser?.rol !== 'admin') return;
+  const confirm = prompt('⚠️ CUIDADO: Esto borrará TODOS los jugadores de la base de datos.\n\nEscribí "BORRAR TODO" para confirmar:');
+  if(confirm !== 'BORRAR TODO') return;
+  try{
+    const r = await fetch('/api/reset-jugadores', {method:'POST'}).then(r=>r.json());
+    if(r.ok){
+      toast('✅ Base de datos limpiada. Sincroniza nuevamente desde Google Sheets.', 'success');
+    } else {
+      toast('❌ Error: ' + (r.error || 'Desconocido'), 'error');
+    }
+  } catch(e){
+    toast('❌ Error de conexión: ' + e.message, 'error');
   }
 }
 
