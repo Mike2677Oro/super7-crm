@@ -246,6 +246,27 @@ def estado_archivos():
                     "total":total,"caba":caba,"mdz":mdz,
                     "gs_caba_ok":gs_ok("CABA"),"gs_mdz_ok":gs_ok("MDZ"),"gspread_ok":GSPREAD_OK})
 
+@app.route("/api/diagnostico", methods=["GET"])
+@login_required
+def diagnostico():
+    from database import get_conn
+    try:
+        with get_conn() as conn:
+            total = conn.execute("SELECT COUNT(*) FROM jugadores").fetchone()[0]
+            caba = conn.execute("SELECT COUNT(*) FROM jugadores WHERE jurisdiccion='CABA'").fetchone()[0]
+            mdz = conn.execute("SELECT COUNT(*) FROM jugadores WHERE jurisdiccion='MDZ'").fetchone()[0]
+            vacios = conn.execute("SELECT COUNT(*) FROM jugadores WHERE jurisdiccion IS NULL OR jurisdiccion=''").fetchone()[0]
+            sample = conn.execute("SELECT nrodoc, jurisdiccion, nombre FROM jugadores LIMIT 5").fetchall()
+        return jsonify({
+            "total": total,
+            "caba": caba,
+            "mdz": mdz,
+            "sin_jurisdiccion": vacios,
+            "muestra": [{"nrodoc": s["nrodoc"], "jur": s["jurisdiccion"], "nombre": s["nombre"]} for s in sample]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/reset-jugadores", methods=["POST"])
 @login_required
 def reset_jugadores():
