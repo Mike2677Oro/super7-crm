@@ -246,6 +246,21 @@ def estado_archivos():
                     "total":total,"caba":caba,"mdz":mdz,
                     "gs_caba_ok":gs_ok("CABA"),"gs_mdz_ok":gs_ok("MDZ"),"gspread_ok":GSPREAD_OK})
 
+@app.route("/api/reset-jugadores", methods=["POST"])
+@login_required
+def reset_jugadores():
+    from database import get_conn
+    try:
+        with get_conn() as conn:
+            conn.execute("DELETE FROM jugadores")
+            conn.execute("DELETE FROM eventos_jugador")
+        global archivo_estado
+        archivo_estado["archivos"] = {}
+        archivo_estado["cargado_en"] = ""
+        return jsonify({"ok": True, "mensaje": "Base de datos limpiada. Sincroniza nuevamente desde Google Sheets."})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 @app.route("/api/stats")
 @login_required
 def api_stats():
