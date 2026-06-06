@@ -256,7 +256,12 @@ def diagnostico():
             caba = conn.execute("SELECT COUNT(*) FROM jugadores WHERE jurisdiccion='CABA'").fetchone()[0]
             mdz = conn.execute("SELECT COUNT(*) FROM jugadores WHERE jurisdiccion='MDZ'").fetchone()[0]
             vacios = conn.execute("SELECT COUNT(*) FROM jugadores WHERE jurisdiccion IS NULL OR jurisdiccion=''").fetchone()[0]
-            sample = conn.execute("SELECT nrodoc, jurisdiccion, nombre FROM jugadores LIMIT 5").fetchall()
+
+            # Muestrear algunos registros
+            muestra = []
+            sample_rows = conn.execute("SELECT nrodoc, jurisdiccion, nombre FROM jugadores LIMIT 5").fetchall()
+            if sample_rows:
+                muestra = [{"nrodoc": s.get("nrodoc"), "jur": s.get("jurisdiccion"), "nombre": s.get("nombre")} for s in sample_rows]
 
         # Test get_stats con parametros
         stats_global = get_stats("")
@@ -268,7 +273,7 @@ def diagnostico():
             "caba": caba,
             "mdz": mdz,
             "sin_jurisdiccion": vacios,
-            "muestra": [{"nrodoc": s["nrodoc"], "jur": s["jurisdiccion"], "nombre": s["nombre"]} for s in sample],
+            "muestra": muestra,
             "get_stats_test": {
                 "global": {"total": stats_global.get("total"), "sin_datos": stats_global.get("sin_datos")},
                 "caba": {"total": stats_caba.get("total"), "sin_datos": stats_caba.get("sin_datos")},
@@ -276,7 +281,8 @@ def diagnostico():
             }
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
 @app.route("/api/reset-jugadores", methods=["POST"])
 @login_required
