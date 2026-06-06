@@ -3961,12 +3961,12 @@ function actualizarUIUsuario(){
 
 async function resetDB(){
   if(_currentUser?.rol !== 'admin') return;
-  const confirm = prompt('⚠️ CUIDADO: Esto borrará TODOS los jugadores de la base de datos.\n\nEscribí "BORRAR TODO" para confirmar:');
+  const confirm = prompt('⚠️ CUIDADO: Esto borrará TODOS los datos EXCEPTO usuarios.\n(Jugadores, campañas, bonos, eventos, journeys, etc.)\n\nEscribí "BORRAR TODO" para confirmar:');
   if(confirm !== 'BORRAR TODO') return;
   try{
     const r = await fetch('/api/reset-jugadores', {method:'POST'}).then(r=>r.json());
     if(r.ok){
-      toast('✅ Base de datos limpiada. Sincroniza nuevamente desde Google Sheets.', 'success');
+      toast('✅ Reset completo. Usuarios preservados. Sincroniza nuevamente desde Google Sheets.', 'success');
     } else {
       toast('❌ Error: ' + (r.error || 'Desconocido'), 'error');
     }

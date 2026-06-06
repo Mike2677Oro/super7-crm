@@ -252,12 +252,20 @@ def reset_jugadores():
     from database import get_conn
     try:
         with get_conn() as conn:
+            # Borrar en orden respetando foreign keys (mantener usuarios intactos)
+            conn.execute("DELETE FROM webhook_events")
+            conn.execute("DELETE FROM sync_log")
+            conn.execute("DELETE FROM journey_log")
+            conn.execute("DELETE FROM bonos")
+            conn.execute("DELETE FROM automatizaciones")
+            conn.execute("DELETE FROM journeys")
+            conn.execute("DELETE FROM campanas")
             conn.execute("DELETE FROM eventos_jugador")
             conn.execute("DELETE FROM jugadores")
         global archivo_estado
         archivo_estado["archivos"] = {}
         archivo_estado["cargado_en"] = ""
-        return jsonify({"ok": True, "mensaje": "Base de datos limpiada. Sincroniza nuevamente desde Google Sheets."})
+        return jsonify({"ok": True, "mensaje": "Base de datos limpiada (usuarios preservados). Sincroniza nuevamente desde Google Sheets."})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
