@@ -249,7 +249,7 @@ def estado_archivos():
 @app.route("/api/diagnostico", methods=["GET"])
 @login_required
 def diagnostico():
-    from database import get_conn
+    from database import get_conn, get_stats
     try:
         with get_conn() as conn:
             total = conn.execute("SELECT COUNT(*) FROM jugadores").fetchone()[0]
@@ -257,12 +257,23 @@ def diagnostico():
             mdz = conn.execute("SELECT COUNT(*) FROM jugadores WHERE jurisdiccion='MDZ'").fetchone()[0]
             vacios = conn.execute("SELECT COUNT(*) FROM jugadores WHERE jurisdiccion IS NULL OR jurisdiccion=''").fetchone()[0]
             sample = conn.execute("SELECT nrodoc, jurisdiccion, nombre FROM jugadores LIMIT 5").fetchall()
+
+        # Test get_stats con parametros
+        stats_global = get_stats("")
+        stats_caba = get_stats("CABA")
+        stats_mdz = get_stats("MDZ")
+
         return jsonify({
             "total": total,
             "caba": caba,
             "mdz": mdz,
             "sin_jurisdiccion": vacios,
-            "muestra": [{"nrodoc": s["nrodoc"], "jur": s["jurisdiccion"], "nombre": s["nombre"]} for s in sample]
+            "muestra": [{"nrodoc": s["nrodoc"], "jur": s["jurisdiccion"], "nombre": s["nombre"]} for s in sample],
+            "get_stats_test": {
+                "global": {"total": stats_global.get("total"), "sin_datos": stats_global.get("sin_datos")},
+                "caba": {"total": stats_caba.get("total"), "sin_datos": stats_caba.get("sin_datos")},
+                "mdz": {"total": stats_mdz.get("total"), "sin_datos": stats_mdz.get("sin_datos")}
+            }
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
