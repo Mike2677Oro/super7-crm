@@ -7,8 +7,8 @@ Los valores sensibles se sobreescriben desde variables de entorno o server.py.
 import os
 
 # ── Ontraport ──────────────────────────────────────────────────────────────────
-ONTRAPORT_API_KEY = os.environ.get("ONTRAPORT_API_KEY", "6RdAMjA2dHj57Rf")
-ONTRAPORT_APP_ID  = os.environ.get("ONTRAPORT_APP_ID",  "2_234387_4mGjbnJ3e")
+ONTRAPORT_API_KEY = os.environ.get("ONTRAPORT_API_KEY", "")
+ONTRAPORT_APP_ID  = os.environ.get("ONTRAPORT_APP_ID",  "")
 
 # ── emBlue ─────────────────────────────────────────────────────────────────────
 EMBLUE_API_KEY  = os.environ.get("EMBLUE_API_KEY", "")

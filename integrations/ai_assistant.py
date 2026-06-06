@@ -602,23 +602,39 @@ def _tool_ejecutar(args, db):
             )
         }
 
-    # ── Ejecución real ────────────────────────────────────────────────────────
+    # ── Ejecución real (paralela) ────────────────────────────────────────────
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     enviados = errores = 0
     detalle  = []
-    for j in jugs:
+
+    def procesar_jugador(j):
+        resultado = {"ok": True, "nrodoc": j.get("nrodoc")}
         tag_final = tag if tag else compute_tag(j)
 
         if tag_final and j.get("email"):
             r = tag_contact(jugador=j, tag=tag_final)
-            if r.get("ok"): enviados += 1
-            else:
-                errores += 1
-                detalle.append({"nrodoc": j.get("nrodoc"), "error": r.get("message")})
+            if not r.get("ok"):
+                resultado["ok"] = False
+                resultado["error"] = r.get("message")
 
         if flow and j.get("telefono"):
             r = trigger_sms_flow(jugador=j, flow=flow)
-            if r.get("ok"): enviados += 1
-            else: errores += 1
+            if not r.get("ok"):
+                resultado["ok"] = False
+                resultado["error"] = r.get("message")
+
+        return resultado
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(procesar_jugador, j): j for j in jugs}
+        for future in as_completed(futures):
+            result = future.result()
+            if result.get("ok"):
+                enviados += 1
+            else:
+                errores += 1
+                detalle.append({"nrodoc": result["nrodoc"], "error": result.get("error")})
 
     # ── Guardar en DB para que aparezca en dashboard e historial ─────────────
     try:
