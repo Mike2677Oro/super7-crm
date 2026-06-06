@@ -394,7 +394,7 @@ def upsert_jugadores(jugadores: list[dict], fuente: str, jur: str) -> dict:
             if not nrodoc or nrodoc in ("nan","None",""): continue
             row = {
                 "nrodoc": nrodoc,
-                "jurisdiccion": j.get("jurisdiccion",""),
+                "jurisdiccion": (j.get("jurisdiccion") or jur or "").strip(),
                 "grupo":        j.get("grupo",""),
                 "subgrupo":     j.get("subgrupo",""),
                 "estado":       j.get("estado",""),
