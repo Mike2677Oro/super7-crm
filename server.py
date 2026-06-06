@@ -252,8 +252,8 @@ def reset_jugadores():
     from database import get_conn
     try:
         with get_conn() as conn:
-            conn.execute("DELETE FROM jugadores")
             conn.execute("DELETE FROM eventos_jugador")
+            conn.execute("DELETE FROM jugadores")
         global archivo_estado
         archivo_estado["archivos"] = {}
         archivo_estado["cargado_en"] = ""
