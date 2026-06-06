@@ -564,7 +564,7 @@ def get_filtros_disponibles(jur="") -> dict:
 # ────────────────────────────────────────────────────────────
 
 def get_stats(jur="") -> dict:
-    w  = "WHERE jurisdiccion=?" if jur else ""
+    w  = "WHERE jurisdiccion=%s" if jur else ""
     p  = [jur] if jur else []
     aw = "AND" if jur else "WHERE"
     with get_conn() as conn:
